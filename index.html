@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Movie Picker</title>
+    <style>
+        /* Reset and Base Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            color: #fff;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+        }
+
+        /* Form Container */
+        .form-container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 30px;
+            width: 100%;
+            max-width: 600px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            margin-bottom: 30px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        select, input {
+            width: 100%;
+            padding: 10px;
+            border: none;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.2);
+            color: #fff;
+            font-size: 1rem;
+        }
+        select option {
+            background: #16213e;
+            color: #fff;
+        }
+        button {
+            background: linear-gradient(45deg, #ff6b6b, #feca57);
+            color: #fff;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin: 5px;
+        }
+        button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 15px rgba(255, 107, 107, 0.4);
+        }
+
+        /* Results Section */
+        .results {
+            width: 100%;
+            max-width: 1200px;
+        }
+        .movie-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        .movie-card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            overflow: hidden;
+            transition: transform 0.3s, box-shadow 0.3s;
+            cursor: pointer;
+        }
+        .movie-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+        .movie-poster {
+            width: 100%;
+            height: 300px;
+            object-fit: cover;
+        }
+        .movie-info {
+            padding: 15px;
+        }
+        .movie-title {
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+        }
+        .movie-overview {
+            font-size: 0.9rem;
+            color: #ccc;
+            margin-bottom: 10px;
+        }
+        .movie-rating {
+            font-weight: bold;
+            color: #feca57;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .modal-content {
+            background: #16213e;
+            padding: 20px;
+            border-radius: 10px;
+            max-width: 500px;
+            width: 90%;
+        }
+        .close {
+            float: right;
+            cursor: pointer;
+            font-size: 1.5rem;
+        }
+
+        /* Watchlist */
+        .watchlist {
+            margin-top: 20px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+        }
+        .watchlist ul {
+            list-style: none;
+        }
+        .watchlist li {
+            margin-bottom: 10px;
+        }
+
+        /* Loading Spinner */
+        .spinner {
+            display: none;
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-top: 4px solid #ff6b6b;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .form-container {
+                padding: 20px;
+            }
+            .movie-grid {
+                grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>Movie Picker</h1>
+    <div class="form-container">
+        <div class="form-group">
+            <label for="genre">Genre:</label>
+            <select id="genre">
+                <option value="">Any</option>
+                <option value="28">Action</option>
+                <option value="12">Adventure</option>
+                <option value="16">Animation</option>
+                <option value="35">Comedy</option>
+                <option value="80">Crime</option>
+                <option value="99">Documentary</option>
+                <option value="18">Drama</option>
+                <option value="10751">Family</option>
+                <option value="14">Fantasy</option>
+                <option value="36">History</option>
+                <option value="27">Horror</option>
+                <option value="10402">Music</option>
+                <option value="9648">Mystery</option>
+                <option value="10749">Romance</option>
+                <option value="878">Science Fiction</option>
+                <option value="10770">TV Movie</option>
+                <option value="53">Thriller</option>
+                <option value="10752">War</option>p
+                <option value="37">Western</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="era">Era (Decade):</label>
+            <select id="era">
+                <option value="">Any</option>
+                <option value="2020">2020s</option>
+                <option value="2010">2010s</option>
+                <option value="2000">2000s</option>
+                <option value="1990">1990s</option>
+                <option value="1980">1980s</option>
+                <option value="1970">1970s</option>
+                <option value="1960">1960s</option>
+                <option value="1950">1950s</option>
+                <option value="1940">1940s</option>
+                <option value="1930">1930s</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="language">Language:</label>
+            <select id="language">
+                <option value="">Any</option>
+                <option value="en">English</option>
+                <option value="es">Spanish</option>
+                <option value="fr">French</option>
+                <option value="de">German</option>
+                <option value="it">Italian</option>
+                <option value="ja">Japanese</option>
+                <option value="ko">Korean</option>
+                <option value="zh">Chinese</option>
+                <option value="hi">Hindi</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="country">Country:</label>
+            <select id="country">
+                <option value="">Any</option>
+                <option value="US">United States</option>
+                <option value="GB">United Kingdom</option>
+                <option value="FR">France</option>
+                <option value="DE">Germany</option>
+                <option value="IT">Italy</option>
+                <option value="JP">Japan</option>
+                <option value="KR">South Korea</option>
+                <option value="CN">China</option>
+                <option value="IN">India</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="rating">Min Rating (IMDb):</label>
+            <input type="number" id="rating" min="0" max="10" step="0.1" placeholder="e.g., 7.0">
+        </div>
+        <div class="form-group">
+            <label for="runtime">Max Runtime (minutes):</label>
+            <input type="number" id="runtime" min="0" placeholder="e.g., 120">
+        </div>
+        <div class="form-group">
+            <label for="sort">Sort By:</label>
+            <select id="sort">
+                <option value="popularity.desc">Popularity</option>
+                <option value="vote_average.desc">Rating</option>
+                <option value="release_date.desc">Release Date</option>
+            </select>
+        </div>
+        <button id="search-btn">Find Movies</button>
+        <button id="random-btn">Pick Random Movie</button>
+    </div>
+
+    <div class="results">
+        <div class="spinner" id="spinner"></div>
+        <div class="movie-grid" id="movie-grid"></div>
+    </div>
+
+    <div class="watchlist">
+        <h2>Your Watchlist</h2>
+        <ul id="watchlist"></ul>
+    </div>
+
+    <!-- Modal for Movie Details -->
+    <div class="modal" id="modal">
+        <div class="modal-content">
+            <span class="close" id="close-modal">&times;</span>
+            <h2 id="modal-title"></h2>
+            <p id="modal-overview"></p>
+            <p><strong>Rating:</strong> <span id="modal-rating"></span></p>
+            <p><strong>Release Date:</strong> <span id="modal-release"></span></p>p
+            <a id="modal-link" href="#" target="_blank">More Info on TMDB</a>
+            <button id="add-to-watchlist">Add to Watchlist</button>
+        </div>
+    </div>
+
+    <script>
+        const apiKey = '81cc1f4e3f049f948feecacc91b023ae'; // Replace with your TMDB API key
+        const baseUrl = 'https://api.themoviedb.org/3';
+        const imageBaseUrl = 'https://image.tmdb.org/t/p/w500';
+
+        let movies = [];
+        let watchlist = JSON.parse(localStorage.getItem('watchlist')) || [];
+
+        // Update watchlist display
+        function updateWatchlist() {
+            const list = document.getElementById('watchlist');
+            list.innerHTML = '';
+            watchlist.forEach(movie => {
+                const li = document.createElement('li');
+                li.textContent = movie.title;
+                list.appendChild(li);
+            });
+            localStorage.setItem('watchlist', JSON.stringify(watchlist));
+        }
+
+        // Fetch movies from TMDB
+        async function fetchMovies() {
+            const genre = document.getElementById('genre').value;
+            const era = document.getElementById('era').value;
+            const language = document.getElementById('language').value;
+            const country = document.getElementById('country').value;
+            const rating = document.getElementById('rating').value;
+            const runtime = document.getElementById('runtime').value;
+            const sort = document.getElementById('sort').value;
+
+            let url = `${baseUrl}/discover/movie?api_key=${apiKey}&sort_by=${sort}&vote_count.gte=10`;
+            if (genre) url += `&with_genres=${genre}`;
+            if (era) url += `&primary_release_date.gte=${era}-01-01&primary_release_date.lte=${parseInt(era) + 9}-12-31`;
+            if (language) url += `&with_original_language=${language}`;
+            if (country) url += `&region=${country}`;
+            if (rating) url += `&vote_average.gte=${rating}`;
+            if (runtime) url += `&with_runtime.lte=${runtime}`;
+
+            document.getElementById('spinner').style.display = 'block';
+            try {
+                const response = await fetch(url);
+                const data = await response.json();
+                movies = data.results || [];
+                displayMovies(movies);
+            } catch (error) {
+                alert('Error fetching movies. Check your API key or internet connection.');
+            }
+            document.getElementById('spinner').style.display = 'none';
+        }
+
+        // Display movies
+        function displayMovies(movieList) {
+            const grid = document.getElementById('movie-grid');
+            grid.innerHTML = '';
+            if (movieList.length === 0) {
+                grid.innerHTML = '<p>No movies found. Try adjusting your filters.</p>';
+                return;
+            }
+            movieList.forEach(movie => {
+                const card = document.createElement('div');
+                card.className = 'movie-card';
+                card.innerHTML = `
+                    <img src="${movie.poster_path ? imageBaseUrl + movie.poster_path : 'https://via.placeholder.com/250x300?text=No+Image'}" alt="${movie.title}" class="movie-poster">
+                    <div class="movie-info">
+                        <h3 class="movie-title">${movie.title}</h3>
+                        <p class="movie-overview">${movie.overview.substring(0, 100)}...</p>
+                        <p class="movie-rating">⭐ ${movie.vote_average}</p>
+                    </div>
+                `;
+                card.addEventListener('click', () => openModal(movie));
+                grid.appendChild(card);
+            });
+        }
+
+        // Open modal
+        function openModal(movie) {
+            document.getElementById('modal-title').textContent = movie.title;
+            document.getElementById('modal-overview').textContent = movie.overview;
+            document.getElementById('modal-rating').textContent = movie.vote_average;
+            document.getElementById('modal-release').textContent = movie.release_date;
+            document.getElementById('modal-link').href = `https://www.themoviedb.org/movie/${movie.id}`;
+            document.getElementById('modal').style.display = 'flex';
+        }
+
+        // Event listeners
+        document.getElementById('search-btn').addEventListener('click', fetchMovies);
+        document.getElementById('random-btn').addEventListener('click', () => {
+            if (movies.length > 0) {
+                const randomMovie = movies[Math.floor(Math.random() * movies.length)];
+                openModal(randomMovie);
+            } else {
+                alert('Search for movies first!');
+            }
+        });
+        document.getElementById('close-modal').addEventListener('click', () => {
+            document.getElementById('modal').style.display = 'none';
+        });
+        document.getElementById('add-to-watchlist').addEventListener('click', () => {
+            const title = document.getElementById('modal-title').textContent;
+            if (!watchlist.find(movie => movie.title === title)) {
+                const movie = movies.find(m => m.title === title);
+                watchlist.push(movie);
+                updateWatchlist();
+            }
+        });
+
+        // Initial load
+        updateWatchlist();
+    </script>
+</body>
+</html>
